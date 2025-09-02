@@ -90,7 +90,7 @@ export class ProductFormComponent implements OnInit {
     }, 800);
   }
 
-  onSubmit(): void {
+  onSubmit() {
     if (this.productForm.valid) {
       this.isLoading.set(true);
       
@@ -126,13 +126,6 @@ export class ProductFormComponent implements OnInit {
     }
   }
 
-  onImageError(event: Event): void {
-    const target = event.target as HTMLImageElement;
-    if (target) {
-      target.src = 'https://via.placeholder.com/300x200?text=Imagen+no+disponible';
-    }
-  }
-
   generateSKU() {
     const randomSKU = 'SKU-' + Math.random().toString(36).substr(2, 9).toUpperCase();
     this.productForm.patchValue({ sku: randomSKU });
@@ -148,7 +141,7 @@ export class ProductFormComponent implements OnInit {
     }
   }
 
-  private markFormGroupTouched(): void {
+  private markFormGroupTouched() {
     Object.keys(this.productForm.controls).forEach(key => {
       const control = this.productForm.get(key);
       control?.markAsTouched();

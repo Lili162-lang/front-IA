@@ -44,10 +44,10 @@ export class ProductsComponent implements OnInit, OnDestroy {
 
   showDeleteModal = signal<boolean>(false);
   showBulkDeleteModal = signal<boolean>(false);
+  showAddModal = signal<boolean>(false);
   productToDelete = signal<Product | null>(null);
 
-  // Modal para agregar producto
-  showAddModal = signal<boolean>(false);
+  // Formulario para agregar producto
   addProductForm: FormGroup;
   isSubmitting = signal<boolean>(false);
 
@@ -281,9 +281,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
   }
 
   addProduct() {
-    console.log('addProduct() called - Current showAddModal state:', this.showAddModal());
     this.showAddModal.set(true);
-    console.log('addProduct() - New showAddModal state:', this.showAddModal());
   }
 
   closeAddModal() {
@@ -296,16 +294,32 @@ export class ProductsComponent implements OnInit, OnDestroy {
     });
   }
 
-  onSubmitAddProduct() {
-    if (this.addProductForm.valid && !this.isSubmitting()) {
-      this.isSubmitting.set(true);
+  generateSKU() {
+    const randomSKU = 'SKU-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+    this.addProductForm.patchValue({ sku: randomSKU });
+  }
 
+  calculateDiscount() {
+    const price = this.addProductForm.get('price')?.value || 0;
+    const originalPrice = this.addProductForm.get('originalPrice')?.value || 0;
+    
+    if (originalPrice > price && originalPrice > 0) {
+      const discount = Math.round(((originalPrice - price) / originalPrice) * 100);
+      return discount;
+    }
+    return 0;
+  }
+
+  onSubmitAddProduct() {
+    if (this.addProductForm.valid) {
+      this.isSubmitting.set(true);
+      
       const formData = this.addProductForm.value;
       const newProduct: Product = {
         id: Math.max(...this.products().map(p => p.id)) + 1,
         ...formData,
-        image: formData.image || `https://picsum.photos/300/200?random=${Date.now()}`,
-        discount: this.calculateDiscount(formData.originalPrice, formData.price)
+        discount: this.calculateDiscount(),
+        image: formData.image || `https://picsum.photos/300/200?random=${Date.now()}`
       };
 
       // Simular guardado
@@ -319,24 +333,6 @@ export class ProductsComponent implements OnInit, OnDestroy {
     } else {
       this.markFormGroupTouched(this.addProductForm);
     }
-  }
-
-  generateSKU() {
-    const randomSKU = 'SKU-' + Math.random().toString(36).substr(2, 9).toUpperCase();
-    this.addProductForm.patchValue({ sku: randomSKU });
-  }
-
-  calculateDiscountInForm() {
-    const price = this.addProductForm.get('price')?.value || 0;
-    const originalPrice = this.addProductForm.get('originalPrice')?.value || 0;
-    return this.calculateDiscount(originalPrice, price);
-  }
-
-  private calculateDiscount(originalPrice: number, price: number): number {
-    if (originalPrice > price && originalPrice > 0) {
-      return Math.round(((originalPrice - price) / originalPrice) * 100);
-    }
-    return 0;
   }
 
   private markFormGroupTouched(formGroup: FormGroup) {
@@ -457,15 +453,14 @@ export class ProductsComponent implements OnInit, OnDestroy {
   }
 
   // Getters para validación en template
-  get name() { return this.addProductForm.get('name'); }
-  get category() { return this.addProductForm.get('category'); }
-  get price() { return this.addProductForm.get('price'); }
-  get originalPrice() { return this.addProductForm.get('originalPrice'); }
-  get stock() { return this.addProductForm.get('stock'); }
-  get description() { return this.addProductForm.get('description'); }
-  get sku() { return this.addProductForm.get('sku'); }
-  get image() { return this.addProductForm.get('image'); }
-  get shippingDays() { return this.addProductForm.get('shipping.estimatedDays'); }
+  get addName() { return this.addProductForm.get('name'); }
+  get addCategory() { return this.addProductForm.get('category'); }
+  get addPrice() { return this.addProductForm.get('price'); }
+  get addOriginalPrice() { return this.addProductForm.get('originalPrice'); }
+  get addStock() { return this.addProductForm.get('stock'); }
+  get addDescription() { return this.addProductForm.get('description'); }
+  get addSku() { return this.addProductForm.get('sku'); }
+  get addShippingDays() { return this.addProductForm.get('shipping.estimatedDays'); }
 }
 
 interface Product {
