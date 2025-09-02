@@ -1,1 +1,597 @@
-<p>products works!</p>
+<div class="products-container">
+  <!-- Header -->
+  <div class="products-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <span class="title-icon">📱</span>
+        LOS PRODUCTOS MÁS VENDIDOS
+        <span class="sparkle">✨</span>
+      </h1>
+      <button class="view-more-btn">Ver más</button>
+    </div>
+  </div>
+
+  <!-- Search and Filters -->
+  <div class="search-section">
+    <div class="search-container">
+      <div class="search-input-wrapper">
+        <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Buscar productos..."
+          [value]="searchTerm()"
+          (input)="onSearchChange($event)"
+        />
+      </div>
+      
+      <div class="filter-pills">
+        <button 
+          class="filter-pill" 
+          [class.active]="selectedCategory() === ''"
+          (click)="onCategoryChange('')"
+        >
+          Todos
+        </button>
+        <button 
+          class="filter-pill"
+          [class.active]="selectedCategory() === 'Electrónicos'"
+          (click)="onCategoryChange('Electrónicos')"
+        >
+          Electrónicos
+        </button>
+        <button 
+          class="filter-pill"
+          [class.active]="selectedCategory() === 'Ropa'"
+          (click)="onCategoryChange('Ropa')"
+        >
+          Ropa
+        </button>
+        <button 
+          class="filter-pill"
+          [class.active]="selectedCategory() === 'Hogar'"
+          (click)="onCategoryChange('Hogar')"
+        >
+          Hogar
+        </button>
+        <button 
+          class="filter-pill"
+          [class.active]="selectedCategory() === 'Deportes'"
+          (click)="onCategoryChange('Deportes')"
+        >
+          Deportes
+        </button>
+        <button 
+          class="filter-pill"
+          [class.active]="selectedCategory() === 'Libros'"
+          (click)="onCategoryChange('Libros')"
+        >
+          Libros
+        </button>
+      </div>
+
+      <!-- Additional Filters -->
+      <div class="filter-pills">
+        <button 
+          class="filter-pill"
+          [class.active]="selectedStatus() === ''"
+          (click)="onStatusChange('')"
+        >
+          Todos los estados
+        </button>
+        <button 
+          class="filter-pill"
+          [class.active]="selectedStatus() === 'active'"
+          (click)="onStatusChange('active')"
+        >
+          Activos
+        </button>
+        <button 
+          class="filter-pill"
+          [class.active]="selectedStatus() === 'inactive'"
+          (click)="onStatusChange('inactive')"
+        >
+          Inactivos
+        </button>
+      </div>
+
+      <div class="filter-pills">
+        <button 
+          class="filter-pill"
+          [class.active]="selectedStock() === ''"
+          (click)="onStockChange('')"
+        >
+          Todo el stock
+        </button>
+        <button 
+          class="filter-pill"
+          [class.active]="selectedStock() === 'in-stock'"
+          (click)="onStockChange('in-stock')"
+        >
+          En stock
+        </button>
+        <button 
+          class="filter-pill"
+          [class.active]="selectedStock() === 'low-stock'"
+          (click)="onStockChange('low-stock')"
+        >
+          Stock bajo
+        </button>
+        <button 
+          class="filter-pill"
+          [class.active]="selectedStock() === 'out-of-stock'"
+          (click)="onStockChange('out-of-stock')"
+        >
+          Sin stock
+        </button>
+      </div>
+
+      <!-- Clear Filters Button -->
+      <button class="view-more-btn" (click)="clearFilters()">
+        Limpiar filtros
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading()" class="loading-grid">
+    <div *ngFor="let item of [1,2,3,4,5,6]" class="skeleton-card">
+      <div class="skeleton-image"></div>
+      <div class="skeleton-content">
+        <div class="skeleton-line long"></div>
+        <div class="skeleton-line medium"></div>
+        <div class="skeleton-line short"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Products Grid -->
+  <div *ngIf="!isLoading() && filteredProducts().length > 0" class="products-grid">
+    <div 
+      *ngFor="let product of filteredProducts(); trackBy: trackByProductId" 
+      class="product-card"
+      [class.featured]="product.featured"
+    >
+      <!-- Discount Badge -->
+      <div *ngIf="product.discount && product.discount > 0" class="discount-badge">
+        {{ product.discount }}% OFF
+      </div>
+
+      <!-- Product Image -->
+      <div class="product-image-container">
+        <img
+          [src]="product.image"
+          [alt]="product.name"
+          class="product-image"
+          loading="lazy"
+        />
+        <div class="image-overlay">
+          <button class="quick-view-btn" (click)="$event.stopPropagation()">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Product Info -->
+      <div class="product-info">
+        <div class="product-category">{{ product.category }}</div>
+        <h3 class="product-name">{{ product.name }}</h3>
+        
+        <!-- Price Section -->
+        <div class="price-section">
+          <div class="current-price">
+            {{ formatPrice(product.price) }}
+          </div>
+          <div *ngIf="product.originalPrice && product.originalPrice > product.price" class="original-price">
+            {{ formatPrice(product.originalPrice) }}
+          </div>
+        </div>
+
+        <!-- Shipping Info -->
+        <div class="shipping-info">
+          <span class="shipping-badge" [class.free]="product.shipping.isFree">
+            {{ product.shipping.isFree ? 'Envío gratis' : 'Envío pago' }}
+          </span>
+          <span class="shipping-icon">🚚</span>
+          <span class="full-text">{{ product.shipping.estimatedDays }} días</span>
+        </div>
+
+        <!-- Stock Info -->
+        <div class="stock-info">
+          <div class="stock-bar">
+            <div 
+              class="stock-fill" 
+              [style.width.%]="getStockPercentage(product.stock)"
+              [class]="'stock-fill ' + getStockLevel(product.stock)"
+            ></div>
+          </div>
+          <span class="stock-text">{{ product.stock }} unidades disponibles</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="product-actions">
+        <button 
+          class="action-btn edit-btn"
+          (click)="editProduct(product.id, $event)"
+          title="Editar"
+        >
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+          </svg>
+        </button>
+        
+        <button 
+          class="action-btn toggle-btn"
+          [class.active]="product.isActive"
+          (click)="toggleProductStatus(product.id, $event)"
+          [title]="product.isActive ? 'Desactivar' : 'Activar'"
+        >
+          <svg *ngIf="product.isActive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+          <svg *ngIf="!product.isActive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L12 12m-3.122-3.122l4.242 4.242M12 12l1.878 1.878"></path>
+          </svg>
+        </button>
+        
+        <button 
+          class="action-btn delete-btn"
+          (click)="confirmDelete(product, $event)"
+          title="Eliminar"
+        >
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading() && filteredProducts().length === 0" class="empty-state">
+    <div class="empty-icon">📦</div>
+    <h3>No hay productos</h3>
+    <p>{{ searchTerm() ? 'No se encontraron productos que coincidan con tu búsqueda.' : 'Comienza agregando tu primer producto.' }}</p>
+    <button class="view-more-btn" (click)="addProduct()">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+      </svg>
+      Agregar Producto
+    </button>
+  </div>
+
+  <!-- Debug info - remove after testing -->
+  <div style="position: fixed; top: 10px; right: 10px; background: red; color: white; padding: 10px; z-index: 9999;">
+    Modal State: {{ showAddModal() ? 'OPEN' : 'CLOSED' }}
+  </div>
+
+  <!-- Floating Add Button -->
+  <button class="fab-add" (click)="addProduct()" style="z-index: 1001;">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+    </svg>
+  </button>
+
+  <!-- Add Product Modal -->
+  <div class="modal-overlay" *ngIf="showAddModal()" (click)="closeAddModal()">
+    <div class="modal-content add-product-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Agregar Nuevo Producto</h3>
+        <button class="modal-close" (click)="closeAddModal()">×</button>
+      </div>
+      
+      <form [formGroup]="addProductForm" (ngSubmit)="onSubmitAddProduct()" class="modal-body">
+        <!-- Nombre y SKU -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="addName">
+              Nombre <span class="text-error">*</span>
+            </label>
+            <input
+              type="text"
+              id="addName"
+              class="form-input"
+              [class.error]="name?.invalid && name?.touched"
+              formControlName="name"
+              placeholder="Ej: iPhone 15 Pro Max"
+            >
+            <div *ngIf="name?.invalid && name?.touched" class="error-message">
+              <span *ngIf="name?.errors?.['required']">El nombre es requerido</span>
+              <span *ngIf="name?.errors?.['minlength']">Mínimo 3 caracteres</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="addSku">
+              SKU <span class="text-error">*</span>
+            </label>
+            <div class="input-with-button">
+              <input
+                type="text"
+                id="addSku"
+                class="form-input"
+                [class.error]="sku?.invalid && sku?.touched"
+                formControlName="sku"
+                placeholder="SKU-001"
+              >
+              <button type="button" class="btn-generate" (click)="generateSKU()">
+                Generar
+              </button>
+            </div>
+            <div *ngIf="sku?.invalid && sku?.touched" class="error-message">
+              <span *ngIf="sku?.errors?.['required']">El SKU es requerido</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Descripción -->
+        <div class="form-group">
+          <label class="form-label" for="addDescription">
+            Descripción <span class="text-error">*</span>
+          </label>
+          <textarea
+            id="addDescription"
+            class="form-input"
+            [class.error]="description?.invalid && description?.touched"
+            formControlName="description"
+            placeholder="Describe las características del producto..."
+            rows="3"
+          ></textarea>
+          <div *ngIf="description?.invalid && description?.touched" class="error-message">
+            <span *ngIf="description?.errors?.['required']">La descripción es requerida</span>
+            <span *ngIf="description?.errors?.['minlength']">Mínimo 10 caracteres</span>
+          </div>
+        </div>
+
+        <!-- Precios -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="addPrice">
+              Precio <span class="text-error">*</span>
+            </label>
+            <div class="input-with-prefix">
+              <span class="input-prefix">$</span>
+              <input
+                type="number"
+                id="addPrice"
+                class="form-input"
+                [class.error]="price?.invalid && price?.touched"
+                formControlName="price"
+                placeholder="0.00"
+                min="0"
+                step="0.01"
+              >
+            </div>
+            <div *ngIf="price?.invalid && price?.touched" class="error-message">
+              <span *ngIf="price?.errors?.['required']">El precio es requerido</span>
+              <span *ngIf="price?.errors?.['min']">Debe ser mayor a 0</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="addOriginalPrice">
+              Precio Original
+            </label>
+            <div class="input-with-prefix">
+              <span class="input-prefix">$</span>
+              <input
+                type="number"
+                id="addOriginalPrice"
+                class="form-input"
+                [class.error]="originalPrice?.invalid && originalPrice?.touched"
+                formControlName="originalPrice"
+                placeholder="0.00"
+                min="0"
+                step="0.01"
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Stock y Categoría -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="addStock">
+              Stock <span class="text-error">*</span>
+            </label>
+            <input
+              type="number"
+              id="addStock"
+              class="form-input"
+              [class.error]="stock?.invalid && stock?.touched"
+              formControlName="stock"
+              placeholder="0"
+              min="0"
+            >
+            <div *ngIf="stock?.invalid && stock?.touched" class="error-message">
+              <span *ngIf="stock?.errors?.['required']">El stock es requerido</span>
+              <span *ngIf="stock?.errors?.['min']">Debe ser mayor o igual a 0</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="addCategory">
+              Categoría <span class="text-error">*</span>
+            </label>
+            <select
+              id="addCategory"
+              class="form-input"
+              [class.error]="category?.invalid && category?.touched"
+              formControlName="category"
+            >
+              <option value="">Seleccionar categoría</option>
+              <option *ngFor="let cat of categories" [value]="cat">
+                {{ cat }}
+              </option>
+            </select>
+            <div *ngIf="category?.invalid && category?.touched" class="error-message">
+              <span *ngIf="category?.errors?.['required']">La categoría es requerida</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Imagen -->
+        <div class="form-group">
+          <label class="form-label" for="addImage">
+            URL de Imagen
+          </label>
+          <input
+            type="url"
+            id="addImage"
+            class="form-input"
+            formControlName="image"
+            placeholder="https://ejemplo.com/imagen.jpg"
+          >
+        </div>
+
+        <!-- Envío -->
+        <div class="form-section">
+          <h4>Configuración de Envío</h4>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Envío Gratis</label>
+              <div class="toggle-container">
+                <label class="toggle-switch">
+                  <input
+                    type="checkbox"
+                    formControlName="shipping.isFree"
+                    class="toggle-input"
+                  >
+                  <span class="toggle-slider"></span>
+                </label>
+                <span class="toggle-label">
+                  {{ addProductForm.get('shipping.isFree')?.value ? 'Sí' : 'No' }}
+                </span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="addShippingDays">
+                Días de Envío
+              </label>
+              <input
+                type="number"
+                id="addShippingDays"
+                class="form-input"
+                [class.error]="shippingDays?.invalid && shippingDays?.touched"
+                formControlName="shipping.estimatedDays"
+                placeholder="1"
+                min="1"
+                max="30"
+              >
+              <div *ngIf="shippingDays?.invalid && shippingDays?.touched" class="error-message">
+                <span *ngIf="shippingDays?.errors?.['min']">Mínimo 1 día</span>
+                <span *ngIf="shippingDays?.errors?.['max']">Máximo 30 días</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Estados -->
+        <div class="form-section">
+          <h4>Estado del Producto</h4>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Producto Activo</label>
+              <div class="toggle-container">
+                <label class="toggle-switch">
+                  <input
+                    type="checkbox"
+                    formControlName="isActive"
+                    class="toggle-input"
+                  >
+                  <span class="toggle-slider"></span>
+                </label>
+                <span class="toggle-label">
+                  {{ addProductForm.get('isActive')?.value ? 'Activo' : 'Inactivo' }}
+                </span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Producto Destacado</label>
+              <div class="toggle-container">
+                <label class="toggle-switch">
+                  <input
+                    type="checkbox"
+                    formControlName="featured"
+                    class="toggle-input"
+                  >
+                  <span class="toggle-slider"></span>
+                </label>
+                <span class="toggle-label">
+                  {{ addProductForm.get('featured')?.value ? 'Destacado' : 'Normal' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      <div class="modal-actions">
+        <button
+          type="button"
+          class="view-more-btn"
+          (click)="closeAddModal()"
+          [disabled]="isSubmitting()"
+          style="background: #6b7280;"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          class="view-more-btn"
+          [disabled]="addProductForm.invalid || isSubmitting()"
+          (click)="onSubmitAddProduct()"
+        >
+          <div *ngIf="isSubmitting()" class="btn-spinner"></div>
+          {{ isSubmitting() ? 'Guardando...' : 'Crear Producto' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Modal -->
+  <div class="modal-overlay" *ngIf="showDeleteModal()" (click)="closeDeleteModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Confirmar Eliminación</h3>
+        <button class="modal-close" (click)="closeDeleteModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-icon">🗑️</div>
+        <p>¿Estás seguro de que deseas eliminar <strong>"{{ productToDelete()?.name }}"</strong>?</p>
+        <p class="text-muted">Esta acción no se puede deshacer.</p>
+      </div>
+      <div class="modal-actions">
+        <button class="view-more-btn" (click)="closeDeleteModal()">Cancelar</button>
+        <button class="view-more-btn" (click)="executeDelete()" style="background: #ef4444;">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bulk Delete Modal -->
+  <div class="modal-overlay" *ngIf="showBulkDeleteModal()" (click)="closeBulkDeleteModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Eliminar Productos Seleccionados</h3>
+        <button class="modal-close" (click)="closeBulkDeleteModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-icon">🗑️</div>
+        <p>¿Estás seguro de que deseas eliminar <strong>{{ selectedCount() }} productos</strong>?</p>
+        <p class="text-muted">Esta acción no se puede deshacer.</p>
+      </div>
+      <div class="modal-actions">
+        <button class="view-more-btn" (click)="closeBulkDeleteModal()">Cancelar</button>
+        <button class="view-more-btn" (click)="executeBulkDelete()" style="background: #ef4444;">Eliminar Todo</button>
+      </div>
+    </div>
+  </div>
+</div>

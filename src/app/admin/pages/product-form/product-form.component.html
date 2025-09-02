@@ -1,1 +1,330 @@
-<p>product-form works!</p>
+<div class="product-form-container">
+  <!-- Header -->
+  <div class="form-header">
+    <button class="view-more-btn" (click)="onCancel()">
+      <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+      Volver
+    </button>
+    <div class="header-content">
+      <h1>{{ isEditMode() ? 'Editar Producto' : 'Nuevo Producto' }}</h1>
+      <p class="text-muted">{{ isEditMode() ? 'Modifica la información del producto' : 'Completa los datos del nuevo producto' }}</p>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading()" class="loading-container">
+    <div class="loading-spinner"></div>
+    <p class="text-muted">Cargando producto...</p>
+  </div>
+
+  <!-- Product Form Card -->
+  <div *ngIf="!isLoading()" class="card">
+    <div class="card-header">
+      <h3>Información del Producto</h3>
+      <p class="text-muted">Completa todos los campos requeridos</p>
+    </div>
+
+    <form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="card-body">
+      <!-- Nombre del producto -->
+      <div class="form-group">
+        <label class="form-label" for="name">
+          Nombre del Producto <span class="text-error">*</span>
+        </label>
+        <input
+          type="text"
+          id="name"
+          class="form-input"
+          [class.error]="name?.invalid && name?.touched"
+          formControlName="name"
+          placeholder="Ej: iPhone 15 Pro Max"
+        >
+        <div *ngIf="name?.invalid && name?.touched" class="error-message">
+          <span *ngIf="name?.errors?.['required']">El nombre es requerido</span>
+          <span *ngIf="name?.errors?.['minlength']">El nombre debe tener al menos 3 caracteres</span>
+        </div>
+      </div>
+
+      <!-- Descripción -->
+      <div class="form-group">
+        <label class="form-label" for="description">
+          Descripción <span class="text-error">*</span>
+        </label>
+        <textarea
+          id="description"
+          class="form-input"
+          [class.error]="description?.invalid && description?.touched"
+          formControlName="description"
+          placeholder="Describe las características principales del producto..."
+          rows="3"
+        ></textarea>
+        <div *ngIf="description?.invalid && description?.touched" class="error-message">
+          <span *ngIf="description?.errors?.['required']">La descripción es requerida</span>
+          <span *ngIf="description?.errors?.['minlength']">La descripción debe tener al menos 10 caracteres</span>
+        </div>
+      </div>
+
+      <!-- SKU -->
+      <div class="form-group">
+        <label class="form-label" for="sku">
+          SKU <span class="text-error">*</span>
+        </label>
+        <div class="input-with-button">
+          <input
+            type="text"
+            id="sku"
+            class="form-input"
+            [class.error]="sku?.invalid && sku?.touched"
+            formControlName="sku"
+            placeholder="SKU-001"
+          >
+          <button type="button" class="btn-generate" (click)="generateSKU()">
+            Generar
+          </button>
+        </div>
+        <div *ngIf="sku?.invalid && sku?.touched" class="error-message">
+          <span *ngIf="sku?.errors?.['required']">El SKU es requerido</span>
+        </div>
+      </div>
+
+      <!-- Precio y Precio Original -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="price">
+            Precio <span class="text-error">*</span>
+          </label>
+          <div class="input-with-prefix">
+            <span class="input-prefix">$</span>
+            <input
+              type="number"
+              id="price"
+              class="form-input"
+              [class.error]="price?.invalid && price?.touched"
+              formControlName="price"
+              placeholder="0.00"
+              min="0"
+              step="0.01"
+              (blur)="calculateDiscount()"
+            >
+          </div>
+          <div *ngIf="price?.invalid && price?.touched" class="error-message">
+            <span *ngIf="price?.errors?.['required']">El precio es requerido</span>
+            <span *ngIf="price?.errors?.['min']">El precio debe ser mayor a 0</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="originalPrice">
+            Precio Original
+          </label>
+          <div class="input-with-prefix">
+            <span class="input-prefix">$</span>
+            <input
+              type="number"
+              id="originalPrice"
+              class="form-input"
+              [class.error]="originalPrice?.invalid && originalPrice?.touched"
+              formControlName="originalPrice"
+              placeholder="0.00"
+              min="0"
+              step="0.01"
+              (blur)="calculateDiscount()"
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Stock y Descuento -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="stock">
+            Stock <span class="text-error">*</span>
+          </label>
+          <input
+            type="number"
+            id="stock"
+            class="form-input"
+            [class.error]="stock?.invalid && stock?.touched"
+            formControlName="stock"
+            placeholder="0"
+            min="0"
+          >
+          <div *ngIf="stock?.invalid && stock?.touched" class="error-message">
+            <span *ngIf="stock?.errors?.['required']">El stock es requerido</span>
+            <span *ngIf="stock?.errors?.['min']">El stock debe ser mayor o igual a 0</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="discount">
+            Descuento (%)
+          </label>
+          <input
+            type="number"
+            id="discount"
+            class="form-input"
+            [class.error]="discount?.invalid && discount?.touched"
+            formControlName="discount"
+            placeholder="0"
+            min="0"
+            max="100"
+            readonly
+          >
+          <small class="form-help">Se calcula automáticamente</small>
+        </div>
+      </div>
+
+      <!-- Categoría -->
+      <div class="form-group">
+        <label class="form-label" for="category">
+          Categoría <span class="text-error">*</span>
+        </label>
+        <select
+          id="category"
+          class="form-input"
+          [class.error]="category?.invalid && category?.touched"
+          formControlName="category"
+        >
+          <option value="">Seleccionar categoría</option>
+          <option *ngFor="let cat of categories" [value]="cat">
+            {{ cat }}
+          </option>
+        </select>
+        <div *ngIf="category?.invalid && category?.touched" class="error-message">
+          <span *ngIf="category?.errors?.['required']">La categoría es requerida</span>
+        </div>
+      </div>
+
+      <!-- URL de Imagen -->
+      <div class="form-group">
+        <label class="form-label" for="image">
+          URL de Imagen
+        </label>
+        <input
+          type="url"
+          id="image"
+          class="form-input"
+          formControlName="image"
+          placeholder="https://ejemplo.com/imagen.jpg"
+        >
+        
+        <!-- Vista previa de imagen -->
+        <div *ngIf="productForm.get('image')?.value" class="image-preview">
+          <img 
+            [src]="productForm.get('image')?.value" 
+            alt="Vista previa"
+            (error)="onImageError($event)"
+          >
+        </div>
+      </div>
+
+      <!-- Configuración de Envío -->
+      <div class="form-section">
+        <h4>Configuración de Envío</h4>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Envío Gratis</label>
+            <div class="toggle-container">
+              <label class="toggle-switch">
+                <input
+                  type="checkbox"
+                  formControlName="shipping.isFree"
+                  class="toggle-input"
+                >
+                <span class="toggle-slider"></span>
+              </label>
+              <span class="toggle-label">
+                {{ productForm.get('shipping.isFree')?.value ? 'Sí' : 'No' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="shippingDays">
+              Días de Envío
+            </label>
+            <input
+              type="number"
+              id="shippingDays"
+              class="form-input"
+              [class.error]="shippingDays?.invalid && shippingDays?.touched"
+              formControlName="shipping.estimatedDays"
+              placeholder="1"
+              min="1"
+              max="30"
+            >
+            <div *ngIf="shippingDays?.invalid && shippingDays?.touched" class="error-message">
+              <span *ngIf="shippingDays?.errors?.['min']">Mínimo 1 día</span>
+              <span *ngIf="shippingDays?.errors?.['max']">Máximo 30 días</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estados del Producto -->
+      <div class="form-section">
+        <h4>Estado del Producto</h4>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Producto Activo</label>
+            <div class="toggle-container">
+              <label class="toggle-switch">
+                <input
+                  type="checkbox"
+                  formControlName="isActive"
+                  class="toggle-input"
+                >
+                <span class="toggle-slider"></span>
+              </label>
+              <span class="toggle-label">
+                {{ productForm.get('isActive')?.value ? 'Activo' : 'Inactivo' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Producto Destacado</label>
+            <div class="toggle-container">
+              <label class="toggle-switch">
+                <input
+                  type="checkbox"
+                  formControlName="featured"
+                  class="toggle-input"
+                >
+                <span class="toggle-slider"></span>
+              </label>
+              <span class="toggle-label">
+                {{ productForm.get('featured')?.value ? 'Destacado' : 'Normal' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <!-- Form Actions -->
+    <div class="card-footer">
+      <div class="form-actions">
+        <button
+          type="button"
+          class="view-more-btn"
+          (click)="onCancel()"
+          [disabled]="isLoading()"
+          style="background: #6b7280;"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          class="view-more-btn"
+          [disabled]="productForm.invalid || isLoading()"
+          (click)="onSubmit()"
+        >
+          <div *ngIf="isLoading()" class="btn-spinner"></div>
+          {{ isLoading() ? 'Guardando...' : (isEditMode() ? 'Actualizar' : 'Crear Producto') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

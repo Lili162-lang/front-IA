@@ -1,0 +1,186 @@
+<nav class="navbar" *ngIf="isLoggedIn()">
+  <div class="navbar-container">
+    <!-- Logo/Brand -->
+    <div class="navbar-brand">
+      <button class="brand-btn" (click)="navigateToProducts()">
+        <span class="brand-icon">🛍️</span>
+        <span class="brand-text">Admin Panel</span>
+      </button>
+    </div>
+
+    <!-- Navigation Links (Desktop) -->
+    <div class="navbar-nav">
+      <button 
+        class="nav-link"
+        [class.active]="router.url === '/admin/products'"
+        (click)="navigateToProducts()"
+      >
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+        </svg>
+        Productos
+      </button>
+
+      <button 
+        class="nav-link"
+        [class.active]="router.url === '/admin/categories'"
+        (click)="navigateToCategories()"
+      >
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+        </svg>
+        Categorías
+      </button>
+
+      <button 
+        class="nav-link"
+        [class.active]="router.url === '/admin/panel'"
+        (click)="navigateToPanel()"
+      >
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+        </svg>
+        Panel
+      </button>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="navbar-actions">
+      <!-- New Product Button -->
+      <button class="btn-new-product" (click)="navigateToNewProduct()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        <span class="btn-text">Nuevo Producto</span>
+      </button>
+
+      <!-- User Menu -->
+      <div class="user-menu">
+        <button class="user-avatar" (click)="toggleMenu()">
+          <span class="avatar-initials">{{ getUserInitials() }}</span>
+          <svg class="dropdown-icon" [class.rotate]="isMenuOpen()" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </button>
+
+        <!-- Dropdown Menu -->
+        <div class="dropdown-menu" [class.show]="isMenuOpen()">
+          <div class="dropdown-header">
+            <div class="user-info">
+              <div class="user-avatar-large">
+                <span class="avatar-initials">{{ getUserInitials() }}</span>
+              </div>
+              <div class="user-details">
+                <div class="user-name">{{ getUserName() }}</div>
+                <div class="user-role">Administrador</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="dropdown-divider"></div>
+
+          <div class="dropdown-body">
+            <button class="dropdown-item" (click)="navigateToNewProduct()">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              Crear Producto
+            </button>
+
+            <button class="dropdown-item" (click)="navigateToProducts()">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+              </svg>
+              Ver Productos
+            </button>
+
+            <button class="dropdown-item" (click)="navigateToPanel()">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+              </svg>
+              Dashboard
+            </button>
+          </div>
+
+          <div class="dropdown-divider"></div>
+
+          <div class="dropdown-footer">
+            <button class="dropdown-item logout-btn" (click)="logout()">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+              </svg>
+              Cerrar Sesión
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu-btn" (click)="toggleMenu()">
+      <svg *ngIf="!isMenuOpen()" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+      <svg *ngIf="isMenuOpen()" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" [class.show]="isMenuOpen()">
+    <div class="mobile-menu-header">
+      <div class="user-info">
+        <div class="user-avatar-large">
+          <span class="avatar-initials">{{ getUserInitials() }}</span>
+        </div>
+        <div class="user-details">
+          <div class="user-name">{{ getUserName() }}</div>
+          <div class="user-role">Administrador</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-menu-body">
+      <button class="mobile-nav-item" (click)="navigateToNewProduct()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        Crear Producto
+      </button>
+
+      <button class="mobile-nav-item" (click)="navigateToProducts()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+        </svg>
+        Productos
+      </button>
+
+      <button class="mobile-nav-item" (click)="navigateToCategories()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+        </svg>
+        Categorías
+      </button>
+
+      <button class="mobile-nav-item" (click)="navigateToPanel()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+        </svg>
+        Panel
+      </button>
+
+      <div class="mobile-menu-divider"></div>
+
+      <button class="mobile-nav-item logout-btn" (click)="logout()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+        </svg>
+        Cerrar Sesión
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- Overlay for mobile menu -->
+<div class="menu-overlay" [class.show]="isMenuOpen()" (click)="closeMenu()"></div>

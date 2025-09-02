@@ -1,0 +1,256 @@
+/* Product Form Styles */
+.product-form-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--spacing-xl);
+  min-height: 100vh;
+}
+
+/* Header */
+.form-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+.header-content h1 {
+  margin: 0;
+  color: var(--gray-900);
+  font-size: 1.875rem;
+  font-weight: 600;
+}
+
+.header-content p {
+  margin: var(--spacing-xs) 0 0 0;
+  color: var(--gray-500);
+  font-size: 0.875rem;
+}
+
+/* Loading */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-2xl);
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--primary-100);
+  border-top: 3px solid var(--primary-600);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: var(--spacing-md);
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Form Layout */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-lg);
+}
+
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+}
+
+/* Input with Prefix */
+.input-with-prefix {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-prefix {
+  position: absolute;
+  left: 1rem;
+  color: var(--gray-500);
+  font-weight: 500;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.input-with-prefix .form-input {
+  padding-left: 2.5rem;
+}
+
+/* Toggle Switch */
+.toggle-container {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-xs);
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 24px;
+}
+
+.toggle-input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--gray-300);
+  transition: 0.3s;
+  border-radius: 24px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+  box-shadow: var(--shadow-sm);
+}
+
+.toggle-input:checked + .toggle-slider {
+  background-color: var(--primary-600);
+}
+
+.toggle-input:checked + .toggle-slider:before {
+  transform: translateX(24px);
+}
+
+.toggle-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--gray-700);
+}
+
+.toggle-input:checked ~ .toggle-label {
+  color: var(--primary-600);
+}
+
+/* Image Preview */
+.image-preview {
+  margin-top: var(--spacing-md);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 2px solid var(--gray-200);
+  max-width: 200px;
+}
+
+.image-preview img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  display: block;
+}
+
+/* Error Messages */
+.error-message {
+  margin-top: var(--spacing-xs);
+  font-size: 0.75rem;
+  color: var(--error);
+  font-weight: 500;
+}
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-md);
+}
+
+@media (max-width: 480px) {
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .form-actions .btn {
+    width: 100%;
+  }
+}
+
+/* Button Spinner */
+.btn-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Card Enhancements */
+.card {
+  border: 1px solid var(--gray-200);
+  transition: box-shadow 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.card-header h3 {
+  margin: 0;
+  color: var(--gray-900);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.card-header p {
+  margin: var(--spacing-xs) 0 0 0;
+  color: var(--gray-500);
+  font-size: 0.875rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .product-form-container {
+    padding: var(--spacing-md);
+  }
+  
+  .form-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+  }
+  
+  .header-content h1 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-form-container {
+    padding: var(--spacing-sm);
+  }
+  
+  .header-content h1 {
+    font-size: 1.25rem;
+  }
+  
+  .image-preview {
+    max-width: 100%;
+  }
+}

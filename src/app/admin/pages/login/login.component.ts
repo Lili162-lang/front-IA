@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { LoginRequest } from '../../../shared/models/auth-tokens.model';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -29,6 +30,14 @@ export class LoginComponent implements OnInit {
   ngOnInit(): void {
     this.initForm();
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/admin/products';
+    
+    // Add test credentials for development (remove in production)
+    if (environment.production === false) {
+      this.loginForm.patchValue({
+        email: 'admin@test.com',
+        password: 'password123'
+      });
+    }
   }
 
   private initForm(): void {
@@ -44,23 +53,30 @@ export class LoginComponent implements OnInit {
       this.errorMessage = null;
 
       const credentials: LoginRequest = this.loginForm.value;
+      console.log('Attempting login with:', { email: credentials.email });
 
       this.authService.login(credentials).subscribe({
         next: (response) => {
-          if (response.success) {
-            this.router.navigate([this.returnUrl]);
-          } else {
-            this.errorMessage = response.message || 'Login failed';
-          }
+          console.log('Login successful:', response);
+          this.router.navigate([this.returnUrl]);
         },
         error: (error) => {
+          console.error('Login error:', error);
           this.isLoading = false;
-          if (error.status === 401) {
-            this.errorMessage = 'Invalid email or password';
-          } else if (error.userMessage) {
-            this.errorMessage = error.userMessage;
+          
+          // Handle different error scenarios
+          if (error.status === 0) {
+            this.errorMessage = 'No se puede conectar al servidor. Verifique que el backend esté ejecutándose en https://10.72.4.32:7133';
+          } else if (error.status === 401) {
+            this.errorMessage = 'Credenciales incorrectas';
+          } else if (error.status === 400) {
+            this.errorMessage = 'Datos de login inválidos';
+          } else if (error.status === 500) {
+            this.errorMessage = 'Error interno del servidor';
+          } else if (error.error?.message) {
+            this.errorMessage = error.error.message;
           } else {
-            this.errorMessage = 'An error occurred during login';
+            this.errorMessage = 'Error al conectar con el servidor';
           }
         },
         complete: () => {
